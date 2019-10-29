@@ -7,19 +7,18 @@ namespace Klassen
     class Program
     {
         static List<string> klassen = new List<string>();
-        static List<int> intList = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         static Random random = new Random();
-        static Dictionary<int, List<string>> gruppering = new Dictionary<int, List<string>>();
+        static Dictionary<int, List<string>> attendeesSortedIntoGroups = new Dictionary<int, List<string>>();
+
         static void Main(string[] args)
         {
             AddData();
-            PresentData();
+            PresentOriginalData();
             Attendees();
             PresentRandomGroups(GroupClass(klassen, NumberOfGroups(klassen)));
-            PresentGroupToDoPresentation(ChoseGroupForPresentation(NumberOfGroups(Randomize(klassen))));
-
-
+            PresentGroupToDoPresentation(ChoseGroupForPresentation(NumberOfGroups(RandomizeAttendees(klassen))));
         }
+
         static void AddData()
         {
             klassen.Add("Alexander Sonerud");
@@ -35,7 +34,7 @@ namespace Klassen
             klassen.Add("Dr Alban");
             klassen.Add("Lena Filen");
         }
-        static void PresentData()
+        static void PresentOriginalData()
         {
             Console.WriteLine("Klass 9A - 2003\n");
             for (int i = 0; i < klassen.Count; i++)
@@ -53,7 +52,7 @@ namespace Klassen
                 int pupilNotHere = int.Parse(Console.ReadLine());
                 klassen.RemoveAt(pupilNotHere - 1);
                 Console.Clear();
-                PresentData();
+                PresentOriginalData();
             }
         }
         static void PresentRandomGroups(Dictionary<int, List<string>> sortedKlass)
@@ -70,10 +69,9 @@ namespace Klassen
                 x++;
             }
         }
-        static List<string> Randomize(List<string> list)
+        static List<string> RandomizeAttendees(List<string> list)
         {
             var models = list.OrderBy(c => random.Next()).Select(c => c).ToList();
-
             return models;
         }
         static int NumberOfGroups(List<string> list)
@@ -83,20 +81,16 @@ namespace Klassen
             if (nr % 3 == 0)
             {
                 delat = nr / 3;
-
                 return delat;
             }
             else if (nr % 3 == 2)
             {
                 delat = nr / 3;
-
                 return delat;
-
             }
             else if (nr % 3 == 1)
             {
                 delat = nr / 2;
-
                 return delat;
             }
             return 0;
@@ -112,56 +106,26 @@ namespace Klassen
             Console.WriteLine($"Grupp nr {groupToDoPresentation}! Tjoho!");
             Console.ReadLine();
         }
-
         static Dictionary<int, List<string>> GroupClass(List<string> list, int chunk)
         {
-            //Randomiserad lista 
-            var newList = Randomize(list);
-
+            var newRandomList = RandomizeAttendees(list);
             for (int i = 0; i <= list.Count / chunk; i++)
             {
-                if (newList.Count >= chunk)
+                if (newRandomList.Count >= chunk)
                 {
-                    gruppering.Add(i, newList.Take(chunk).ToList());
+                    attendeesSortedIntoGroups.Add(i, newRandomList.Take(chunk).ToList());
 
                     for (int x = 0; x < chunk; x++)
                     {
-                        newList.RemoveAt(0);
+                        newRandomList.RemoveAt(0);
                     }
                 }
-                else if (newList.Count != 0)
+                else if (newRandomList.Count != 0)
                 {
-                    gruppering.Add(i, newList.Take(newList.Count).ToList());
+                    attendeesSortedIntoGroups.Add(i, newRandomList.Take(newRandomList.Count).ToList());
                 }
             }
-            return gruppering;
+            return attendeesSortedIntoGroups;
         }
     }
-
-    //Select 1: Lägg till index till varje value. x = string, i = int(indexvärde). 
-    //Anonym funktion sätter värden till variablarna Value och Index. 
-    //GroupBy: Gruppera listan i nya listor baserat på indexvärdet. 
-    //Select 2: 
-    public static class ListExtensions
-    {
-        public static List<List<T>> ChunkBy<T>(this List<T> source, int chunkSize)
-        {
-            return source
-                .Select((x, i) => new { Value = x, Index = i })
-                .GroupBy(x => x.Index / chunkSize)
-                .Select(x => x.Select(v => v.Value).ToList())
-                .ToList();
-        }
-
-        public static List<List<T>> ChunkBy2<T>(this List<T> source, int chunkSize)
-        {
-            return source
-                .Select((x, i) => new { Value = x, Index = i })
-                .GroupBy(x => x.Index / chunkSize)
-                .Select(x => x.Select(v => v.Value).ToList())
-                .ToList();
-        }
-
-    }
-
 }
